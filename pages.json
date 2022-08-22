@@ -1,0 +1,95 @@
+{
+	"pages": [
+        {
+            "path" : "pages/home/home",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "首页",
+                //自定义导航栏
+                "navigationStyle": "custom",
+                "onReachBottomDistance": 50
+            }
+            
+        },
+        {
+        	"path": "pages/list/list",
+        	"style": {
+        		"navigationBarTitleText": "菜单",
+                 "navigationStyle": "custom"
+        	}
+        },
+        {
+            "path" : "pages/order/order",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "订单"
+            }
+            
+        }
+        ,{
+            "path" : "pages/user/user",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "用户"
+            }
+            
+        }
+    ],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "咔咔",
+		"navigationBarBackgroundColor": "#4558ad",
+		"backgroundColor": "#F8F8F8",
+		"app-plus": {
+			"background": "#efeff4"
+		}
+	},
+    
+    "tabBar": {
+        "color": "#000",
+        "list": [
+            {
+                "pagePath": "pages/home/home",
+                "text": "首页",
+                "iconPath": "static/home.png",
+                "selectedIconPath": "static/home.png"
+               
+            },
+            {
+                "pagePath": "pages/list/list",
+                "text": "菜单",
+                "iconPath": "static/list.png",
+                "selectedIconPath": "static/list.png"
+            },
+           {
+               "pagePath": "pages/order/order",
+               "text": "订单",
+               "iconPath": "static/order.png",
+               "selectedIconPath": "static/order.png"
+           },
+           {
+               "pagePath": "pages/user/user",
+               "text": "个人",
+               "iconPath": "static/user.png",
+               "selectedIconPath": "static/user.png"
+           }
+        ]
+    },
+    
+    //分包
+    "subPackages": [
+        {
+            "root": "subpkg",
+            "pages": [{
+                    "path" : "goods_detail/goods_detail",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+            ]
+        }
+    ]
+}
