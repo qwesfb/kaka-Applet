@@ -34,10 +34,11 @@
             }
             
         }
+        
     ],
 	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "咔咔",
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "咔咔饮品",
 		"navigationBarBackgroundColor": "#4558ad",
 		"backgroundColor": "#F8F8F8",
 		"app-plus": {
@@ -75,13 +76,14 @@
            }
         ]
     },
-    
     //分包
     "subPackages": [
         {
             "root": "subpkg",
-            "pages": [{
-                    "path" : "goods_detail/goods_detail",
+            "pages": [
+                
+            {
+                    "path" : "search/search",
                     "style" :                                                                                    
                 {
                     "navigationBarTitleText": "",
