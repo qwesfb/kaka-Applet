@@ -20,6 +20,14 @@ $http.afterRequest = function () {
   wx.hideLoading()
 }
 
+// 封装的展示消息提示的方法,当数据请求失败之后，调用 uni.showToast() 方法来提示用户
+uni.$showMsg = function (title = '数据加载失败！', duration = 1500) {
+  uni.showToast({
+    title,
+    duration,
+    icon: 'none',
+  })
+}
 Vue.config.productionTip = false
 
 App.mpType = 'app'

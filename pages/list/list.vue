@@ -1,8 +1,9 @@
 <template>
   <view>
-      <view class="search" >
+      <view class="search" :style="{'padding-top':navheight+10+'px'}">
+         
           <text>咔咔饮品</text>
-          <uni-search-bar radius="100" @confirm="search" clearButton="none" cancelButton="none"  />
+           <uni-icons type="search" size="23" color="#4558ad" @tap="search()"></uni-icons>
       	</view>
     <view class="scroll-view-container">
       <!-- 左侧的滚动视图区域 -->
@@ -21,7 +22,7 @@
             <view class="container">
                 <text  class="text title">{{ item.cat_title}}</text>
                 <text  class="text ftitle">[{{ item. cat_text }}]</text>
-                <text  class="text price">￥{{ item.cat_price }}<text class="ftitle">起</text></text>
+                <text  class="text price">￥{{ item.cat_price }}<text class="ftitle"> 起</text></text>
                 
             </view>
             <view class="item-right">
@@ -43,7 +44,8 @@
                 active:0,
                 menuRight:[],
                 // 窗口的可用高度 = 屏幕高度 - navigationBar高度 - tabBar 高度
-                wh: 0
+                wh: 0,
+                navheight:0
             };
         },
         onLoad() {
@@ -52,6 +54,8 @@
             const sysInfo = uni.getSystemInfoSync()
             // 为 wh 窗口可用高度动态赋值
             this.wh = sysInfo.windowHeight
+            //导航高度
+            this.navheight = sysInfo.statusBarHeight
         },
         methods: {
             async getMenu(){
@@ -64,8 +68,12 @@
                 this.active = i
                 this.getMenu()
             },
-            choice(){
-               
+                
+            search(){
+                uni.navigateTo({
+                   url:'/subpkg/search/search',
+                    fail: () => {'跳转搜索页面失败'}
+                });
             }
         }
     }
@@ -73,19 +81,20 @@
 
 <style lang="less">
 .search{
-    margin: 6vh 0 20rpx 0;
-    
-    height: 6vh;
+    margin-left: 30rpx;
+    font-size: 35rpx;
+    font-weight: bolder;
     color: #4558ad;
-    display: flex;
-    align-items: center;
-    font-weight:bolder;
-    width: 80;
-    margin-left: 10rpx;
+        
+    uni-icons{
+        margin-left: 45%;
+    }
 }
 .scroll-view-container {
-  display: flex;
-  letter-spacing: 2rpx;
+    border-top: #4558ad solid 10rpx;
+    margin-top: 20rpx;
+    display: flex;
+    letter-spacing: 2rpx;
   
   .left-scroll-view {
     width: 100px;
@@ -118,53 +127,55 @@
     }
   }
   
-    .right-scroll-view-item{
-      height: 100px;
-      margin-left: 2%;
-      display: flex;
-      padding:2%;
-      
-     image{
-          height: 100%;
-          width: 30%;
+.right-scroll-view-item{
+background-color: #ffffff;
+  height: 100px;
+  margin-left: 2%;
+  display: flex;
+  padding:2%;
+  
+ image{
+      height: 100%;
+      width: 30%;
+  }
+
+  .container{ 
+      width: 45%;
+      .text{
+          margin-top: 2%;
+          margin-left: 5%;
+          display: block
       }
- 
-         
-      .container{ 
-          width: 45%;
-          .text{
-              margin-top: 2%;
-              margin-left: 5%;
-              display: block
-          }
-          .title{
-               font-size: 30rpx;
-              font-weight: bolder;
-          }
-          .ftitle{
-              font-size: 15rpx;
-              color: #707070;
-          }
-              
-          .price{
-             margin: 80rpx 20rpx 0 0;
-              font-size: 40rpx;
-          }
+      .title{
+           font-size: 30rpx;
+          font-weight: bolder;
       }
-      .item-right{
-          width: 25%;
-          height: 100%;
-         
-          button{
-              margin-top:110%;
-              width: 95%;
-              height: 20%;
-              background-color: #4558ad;
-              color: #ffffff;
-              font-size:22rpx;
-              line-height:20px;
-          }
+      .ftitle{
+          font-size: 15rpx;
+          color: #707070;
+      }
+          
+      .price{
+         margin: 75rpx 20rpx 0 0;
+       
+        font-size: 35rpx;
+        font-weight: bolder;
       }
   }
+  .item-right{
+      width: 25%;
+      height: 100%;
+     
+      button{
+          margin-top:100%;
+          width: 95%;
+          height: 20%;
+          background-color: #4558ad;
+          color: #ffffff;
+          font-size:22rpx;
+          line-height:20px;
+      }
+  }
+}
 }
 </style>
