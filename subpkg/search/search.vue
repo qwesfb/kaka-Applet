@@ -92,7 +92,7 @@
                //2.生成的是一个Set类型而不是一个数组类型，需要我们把他转换成为数组类型
                this.historyList = Array.from(set)
                //1.wxAPI  将data 存储在本地缓存中指定的 key 中
-               uni.setStorageSync('searchValue', JSON.stringify (this.historyList))
+               uni.setStorageSync('searchValue', JSON.stringify(this.historyList))
                },
                    
             remove(){

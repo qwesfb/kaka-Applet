@@ -134,7 +134,7 @@
 	$uni-card-content-color: $uni-base-color;
 
 	.uni-card {
-		margin: $uni-card-spacing;
+		// margin: $uni-card-spacing;
 		padding: 0 $uni-spacing-sm;
 		border-radius: 4px;
 		overflow: hidden;
