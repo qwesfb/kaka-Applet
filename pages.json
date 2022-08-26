@@ -91,6 +91,15 @@
                 }
                 
                 }
+                ,{
+                    "path" : "goods/goods",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
             ]
         }
     ]
