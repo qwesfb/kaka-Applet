@@ -37,34 +37,45 @@
                         <image :src="item.cat_img"></image>
                     </view>
                     <view class="dialog-text">
-                        <view class="title">{{ item.cat_title}}</view>
+                        <view class="title">{{ item.cat_title}} 
+                        <view class="favi">
+                            <uni-icons type="heart" size="20"></uni-icons>
+                            <text>收藏</text>
+                        </view>
+                       </view>
                         <view class="text">{{ item.cat_int }}</view>
                     </view>
                     <view class="dialog-int">
                         <text class="int-text">杯型</text>
-                        <uni-data-checkbox   mode="tag" :localdata="range" @change="change" 
-                        selectedTextColor="#fff" selectedColor="#4558ad">
+                        <uni-data-checkbox v-model="value" mode="tag" :localdata="range"
+                        selectedTextColor="#fff" selectedColor="#4558ad" @change="change(item.cat_price)">
                          </uni-data-checkbox>
                     </view>
                     <view class="dialog-int">
                         <text>甜度</text>
-                        <uni-data-checkbox mode="tag" :localdata="rangeb"  
-                        selectedTextColor="#fff" selectedColor="#4558ad">
+                        <uni-data-checkbox mode="tag" :localdata="rangeb"  v-model="sweetValue"
+                        selectedTextColor="#fff"  selectedColor="#4558ad" @change="changeValue() ">
                         </uni-data-checkbox>
                     </view>
                     
                   </view>
                   </scroll-view>
+                  
                  <!-- 2按钮 -->
-                 
+                 <uni-data-picker></uni-data-picker>
                  <uni-card class='dialog-body' >
                      <view class="body-header">
-                        <text>￥{{ item.cat_price }}</text>
+                        <view class="body-text">
+                            <text>￥{{ price }} </text>
+                            <view class="body-text-min">
+                            <text  v-for="(item,i) in goodsInt" :key="i">{{ item }}</text>
+                           </view>
+                        </view>
                         <uni-number-box @change="changeValue" min="1" max="99"></uni-number-box>
                      </view>
                      <view class="body-bottom">
                           <button>立即购买</button>
-                         <button>加入购物车</button>
+                         <button @tap="cat(item)"> 加入购物车</button>
                      </view>
                  </uni-card>
                 
@@ -89,9 +100,18 @@
                 // 窗口的可用高度 = 屏幕高度 - navigationBar高度 - tabBar 高度
                 wh: 0,
                 navheight:0,
+                value: 0,
+                sweetValue:0,
                 range: [{"value": 0,"text": "M杯"},{"value": 1,"text": "L杯"}],
                 rangeb: [{"value": 0,"text": "7分糖"},{"value": 1,"text": "不加糖"},{"value": 2,"text": "3分糖"}],
-               
+                //商品价格
+                price:'',
+                //杯型
+                sizeInt:[],
+                //甜度
+                sweetInt:[],
+                //he
+                goodsInt:[]
             };
         },
         onLoad() {
@@ -109,6 +129,7 @@
                 const { data : res } = await uni.$http.get(`/kaka/v1/menu`)
                 this.memuList = res.message
                 this.menuRight = res.message[0].children
+                this.price = this.menuRight.cat_price
             },
             //动态判断-样式
             activemenu(i){
@@ -125,13 +146,52 @@
             //弹出框
             toggle(index) {
                 this.$refs.popup[index].open()
+                //先调用商品价格
+                this.price = this.menuRight[index].cat_price
+                 if(this.goodsInt.length < 2){
+                     this.sizeInt.push(this.range[0].text)
+                     this.sweetInt.push(this.rangeb[0].text)
+                     this.goodsInt = this.sizeInt + this.sweetInt
+                 }
+
+                
+               
             },
-            change(e){
-            				console.log('e:',e);
+            change(e) {
+                if(this.value === 0 ){
+                    this.price = e
+                    this.sizeInt = []
+                    this.sizeInt.push(this.range[0].text)
+                    this.goodsInt = this.sizeInt + this.sweetInt
+                }else{
+                   const priceb = Number(e)+1
+                   this.price = priceb
+                   this.sizeInt = []
+                   this.sizeInt.push(this.range[1].text)
+                   this.goodsInt = this.sizeInt + this.sweetInt
+                }
             },
+            //数据选择器
             changeValue(value) {
-                            console.log('返回数值：', value);
-            }
+                if(this.sweetValue == 0){
+                    this.sweetInt = []
+                    this.sweetInt.push(this.rangeb[0].text)
+                    this.goodsInt = this.sizeInt + this.sweetInt
+                }else if(this.sweetValue == 1){
+                    this.sweetInt = []
+                    this.sweetInt.push(this.rangeb[1].text)
+                    this.goodsInt = this.sizeInt + this.sweetInt
+                }else{
+                    this.sweetInt = []
+                    this.sweetInt.push(this.rangeb[2].text)
+                    this.goodsInt = this.sizeInt + this.sweetInt
+                }
+
+            },
+            //购物车
+           cat(e){
+               
+           },
         }
     }
 </script>
@@ -163,13 +223,12 @@
   
   .left-scroll-view {
     width: 100px;
-
+    background-color: $bg-left-color;
     .left-scroll-view-item {
       line-height: 70px;
-      background-color: $bg-left-color;
+      //background-color: $bg-left-color;
       text-align: center;
       font-size: 12px;
-     
       
       // 激活时 项的样式
       &.active {
@@ -192,7 +251,7 @@
     }
   }
   
-.right-scroll-view-item{
+    .right-scroll-view-item{
     background-color: $bg-right-color;
     height: 100px;
     margin: 20rpx 0 0 2%;
@@ -214,6 +273,7 @@
       .title{
            font-size: 30rpx;
           font-weight: bolder;
+          
       }
       .ftitle{
           font-size: 15rpx;
@@ -241,38 +301,53 @@
       }
       
       // 弹出框
+    
+        .dialog-a:empty {
+             // 插槽是空 则显示默认插槽
+          display: block;
+        }
       .dialog-a{
           border-radius: 100rpx;
           margin:0 30rpx;
-          margin-bottom: 20% !important;
+          margin-bottom: 25% !important;
           .dialog-img{
-              height: 250rpx;
+              height: 200rpx;
               display: flex;
               justify-content: center;
               align-items: center;
               margin: 20rpx 0;
           }
           .dialog-text{
-              height: 180rpx;
+              height: 200rpx;
               .title{
                    font-size: 40rpx;
-                   font-weight: bolder;
+                   font-weight:500;
                    margin-bottom: $mg-left;
+                   display: flex;
+                   justify-content: space-between;
+                .favi{
+                    display: flex;
+                    flex-direction: column;
+                    border-left: $border-css;
+                    margin-right: $mg-left;
+                    padding-left: $mg-left*2;
+                    font-size: 20rpx;
+                }
               }
               .text{
-                  font-size: $mg-left;
+                  font-size: $mg-left+5rpx;
                   color: $text-color;
+                  letter-spacing: 5rpx;
               }
           }
+          
           .dialog-int{
-              margin:10rpx 0 20rpx 0; 
+              margin:$mg-left 0 10rpx 0; 
               height: 150rpx;
-             
-              .int-text{
-                  margin-bottom: 50rpx;
-              }
+             .uni-data-checklist{
+                 margin-top: 15rpx !important;
+             }
           }
-
       }
   }
       .uni-card{
@@ -290,7 +365,14 @@
              margin:10rpx;
              display: flex;
              justify-content: space-between;
-             
+             .body-text{
+                 display: flex;
+                 flex-direction: column;
+                 .body-text-min{
+                     font-weight: 200;
+                     font-size: 25rpx;
+                 }
+             }
              .uni-numbox__minus {
                  border:  $border-css;
                  background-color:  $button-bg;
@@ -312,7 +394,7 @@
                       color: $mian-color !important;
                  }
          }
-
+        
          .body-bottom{
              margin:15rpx;
             display: flex;
