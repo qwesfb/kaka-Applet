@@ -18,23 +18,27 @@
       <!-- 右侧的滚动视图区域 -->
       <scroll-view class="right-scroll-view" scroll-y :style="{height: wh + 'px'}">
         <view class="right-scroll-view-item" v-for=" (item,index) in menuRight" :key="index">
-           <image :src="item.cat_img"></image>
-           
+           <image :src="item.cat_img" class="img"></image>
+           <view class="container-right">
             <view class="container">
                 <text  class="text title">{{ item.cat_title}}</text>
                 <text  class="text ftitle">[{{ item. cat_text }}]</text>
-                <text  class="text price">￥{{ item.cat_price }}<text class="ftitle"> 起</text></text>
             </view>
-            
             <view class="item-right">
-              <button  @click=" toggle(index)">选规格</button>
+                <text  class="text price">￥{{ item.cat_price }}
+                    <text class="ftitle" style="margin-left: 10rpx;"> 起</text>
+                </text>
+           
+            
+          
+              <button class="btns" @click=" toggle(index)">选规格</button>
               
               <!-- 弹出框 -->
-              <uni-popup ref="popup" type="bottom" background-color="#fff" class='popup-box'>
+              <uni-popup ref="popup"  v-show="show" type="bottom" background-color="#fff" class='popup-box'>
                   <scroll-view>
                   <view class="dialog-a">
                     <view class="dialog-img">  
-                        <image :src="item.cat_img"></image>
+                        <image :src="item.cat_img" class="img"></image>
                     </view>
                     <view class="dialog-text">
                         <view class="title">{{ item.cat_title}} 
@@ -62,7 +66,6 @@
                   </scroll-view>
                   
                  <!-- 2按钮 -->
-                 <uni-data-picker></uni-data-picker>
                  <uni-card class='dialog-body' >
                      <view class="body-header">
                         <view class="body-text">
@@ -74,8 +77,8 @@
                         <uni-number-box @change="changeValue" min="1" max="99"></uni-number-box>
                      </view>
                      <view class="body-bottom">
-                          <button>立即购买</button>
-                         <button @tap="cat(item)"> 加入购物车</button>
+                          <button class="btns">立即购买</button>
+                          <button class="btns" @tap="cat(item)"> 加入购物车</button>
                      </view>
                  </uni-card>
                 
@@ -84,13 +87,50 @@
               
             </view>
         </view>
+        </view>
       </scroll-view>
     </view>
- 
+    <!-- 购物车 -->
+    <view class="cart" v-show="shoppingCat">
+       
+        <view class="cart-item">
+           <uni-badge class="uni-badge-left-margin" :text="count" absolute="rightTop" :offset="[-3, -3]" >
+           		<image class="bag" src="../../static/bag.png" @tap.native="opengoods"></image>
+           	</uni-badge>
+            <text>￥0</text>
+        </view>
+        <button class="cart-item-right" @click="pay">
+            <text>去结算</text>
+        </button>
+        
+    </view>
+    <!-- 购物车商品 -->
+    <scroll-view class="con" scroll-y v-show="openGoods">
+        <view class="con-sum">
+            <view>
+                <radio color="#4558ad" style="transform: scale(0.7); " checked='true'></radio>
+                <text>全选</text>
+           </view>
+           <view @tap='remove'>
+               <uni-icons type="trash" size="17" ></uni-icons>  
+               <text>清空</text>
+           </view>
+        </view>
+       <view>
+        <block v-for="(goods, i) in cart" :key="i">
+           <!-- 自定义组件 -->
+          <my-goods :goods="goods" @radio-change="radioChangeHandler" @num-change="numberChangeHandler"></my-goods>
+        </block>
+      </view>
+    </scroll-view>
   </view>
+  
 </template>
 
 <script>
+    // 按需导入 mapMutations 这个辅助方法
+    import { mapState,mapMutations, mapGetters } from "vuex"
+    
     export default {
         data() {
             return {
@@ -111,8 +151,17 @@
                 //甜度
                 sweetInt:[],
                 //he
-                goodsInt:[]
-            };
+                goodsInt:[],
+                //购物袋商品数量
+                count:0,
+                //控制商品显示
+                show:true,
+                //
+                shoppingCat:false,
+                //
+                openGoods: false,
+                //购物车商品高度
+            }
         },
         onLoad() {
             this.getMenu()
@@ -122,6 +171,10 @@
             this.wh = sysInfo.windowHeight
             //导航高度
             this.navheight = sysInfo.statusBarHeight
+            if(this.cart.length != 0){
+                 this.shoppingCat= !this.shoppingCat
+            }
+           
            
         },
         methods: {
@@ -146,6 +199,7 @@
             //弹出框
             toggle(index) {
                 this.$refs.popup[index].open()
+                this.shoppingCat = false
                 //先调用商品价格
                 this.price = this.menuRight[index].cat_price
                  if(this.goodsInt.length < 2){
@@ -186,13 +240,78 @@
                     this.sweetInt.push(this.rangeb[2].text)
                     this.goodsInt = this.sizeInt + this.sweetInt
                 }
-
             },
             //购物车
-           cat(e){
-               
+           cat(item){
+               //关闭弹出框
+              this.shoppingCat =  !this.shoppingCat
+              this.show = !this.show;
+               //组织选中的商品的信息对象
+                const goods = {
+                        goods_id: item.cat_id,       // 商品的Id
+                        goods_name: item.cat_title,   // 商品的名称
+                        goods_price: this.price,// 商品的价格
+                        goods_count: 1 ,                           // 商品的数量
+                        goods_small_logo: item.cat_img, // 商品的图片
+                        goods_state: true,                      // 商品的勾选状态
+                        goods_content: this.goodsInt  //商品选择参数
+                     }
+               // 3. 通过 this 调用映射过来的 addToCart 方法，把商品信息对象存储到购物车中
+                this.addToCart(goods)
            },
-        }
+           //vuex购物车辅助方法
+           
+           //把 m_cart 模块中的 addToCart 方法映射到当前页面使用
+            ...mapMutations('m_cart', ['addToCart','updateGoodsState','updateGoodsCount','removeGoods']),
+            
+            //勾选状态改变
+            radioChangeHandler(e) {
+                console.log(e) // 输出得到的数据 -> {goods_id: 395, goods_state: false}
+                this.updateGoodsState(e)
+            },
+            // 商品的数量发生了变化
+            numberChangeHandler(e) {
+              this.updateGoodsCount(e)
+            },
+            //跳转结算页面
+            pay(){
+                console.log(22);
+               uni.navigateTo({
+                  url:'/subpkg/pay/pay',
+                   fail: () => {'跳转搜索页面失败'}
+               });
+            },
+            //购物袋点击
+            opengoods(){
+                this.openGoods = !this.openGoods
+            },
+            //清空
+            remove(e){
+                this.removeGoods(e)
+                this.openGoods = !this.openGoods
+            }
+        },
+    
+        computed: {
+            // 调用 mapState 方法，把 m_cart 模块中的 cart 数组映射到当前页面中，作为计算属性来使用
+            // ...mapState('模块的名称', ['要映射的数据名称1', '要映射的数据名称2'])
+            ...mapState('m_cart', ['cart']),
+             // 把 m_cart 模块中名称为 total 的 getter 映射到当前页面中使用
+            ...mapGetters('m_cart', ['total']),
+          },
+          
+          // 通过 watch 侦听器，监听计算属性 total 值的变化，从而动态为购物车按钮的徽标赋值：
+            watch: {
+              // 监听 total 值的变化，通过第一个形参得到变化后的新值
+              //用对象的方法监听
+              total: {
+              handler(newVal) {
+                this.count = newVal
+              },
+              //声明此侦听器在页面初次加载完成调用
+              immediate: true
+              }
+            },
     }
 </script>
 
@@ -200,10 +319,11 @@
     $mian-color: #4558ad ;
     $mg-left: 20rpx;
     $bg-right-color: #ffffff ;
-    $bg-left-color: #f7f7f7;
-    $text-color: #707070;
+    $bg-left-color: #f6f6f6;
+    $text-color: #a8a8a8;
+    $img-size: 28%;
     $border-css: #d2d2d2 1rpx solid;
-    $button-bg: $bg-right-color !important;
+    
 .search{
     margin-left: 30rpx;
     font-size: 35rpx;
@@ -224,6 +344,7 @@
   .left-scroll-view {
     width: 100px;
     background-color: $bg-left-color;
+    
     .left-scroll-view-item {
       line-height: 70px;
       //background-color: $bg-left-color;
@@ -251,79 +372,86 @@
     }
   }
   
-    .right-scroll-view-item{
+.right-scroll-view-item{
     background-color: $bg-right-color;
     height: 100px;
-    margin: 20rpx 0 0 2%;
+    margin: $mg-left 0 $mg-left 2%;
     display: flex;
     padding:2%;
   
-    image{
+    .img{
       height: 100%;
-      width: 30%;
-  }
+      width: $img-size;
+      border-radius: $mg-left;
+    }
+    .container-right{
+        margin-left: $mg-left;
+        width: 66%;
+        .text{
+            margin-top: 2%;
+            display: block
+        }
+        .container{ 
+            height: 50%;
+            margin:  $mg-left 0;
+        }
+        .title{
+            font-size: 30rpx;
+            font-weight: bolder;
+          
+        }
+        .ftitle{
+           font-size: 23rpx;
+           color: $text-color;
+       }
 
-    .container{ 
-      width: 45%;
-      .text{
-          margin-top: 2%;
-          margin-left: 5%;
-          display: block
-      }
-      .title{
-           font-size: 30rpx;
-          font-weight: bolder;
-          
-      }
-      .ftitle{
-          font-size: 15rpx;
-          color: $text-color;
-      }
-          
-      .price{
-         margin: 75rpx 20rpx 0 0;
+    .item-right{
+         height: 35%;
+        display: flex;
+        align-items: center;
+        
+     .price{
         font-size: 35rpx;
         font-weight: bolder;
-      }
-  }
-    .item-right{
-      width: 25%;
-      height: 100%;
-     
-      button{
-          margin-top:100%;
-          width: 95%;
-          height: 20%;
+     }
+      .btns{
+          width: 140rpx;
+          border-radius: $mg-left;
           background-color: $mian-color;
           color: $bg-right-color;
           font-size:22rpx;
           line-height:20px;
+          margin-right: $mg-left ;
       }
       
       // 弹出框
-    
+    .vue-ref{
+        padding:  0 !important;
+    }
         .dialog-a:empty {
              // 插槽是空 则显示默认插槽
           display: block;
         }
       .dialog-a{
-          border-radius: 100rpx;
-          margin:0 30rpx;
-          margin-bottom: 25% !important;
+          margin:15rpx 30rpx;
           .dialog-img{
               height: 200rpx;
               display: flex;
               justify-content: center;
               align-items: center;
               margin: 20rpx 0;
+              .img{
+                  width: 50%;
+              }
           }
           .dialog-text{
-              height: 200rpx;
+              height: 175rpx;
               .title{
                    font-size: 40rpx;
                    font-weight:500;
                    margin-bottom: $mg-left;
                    display: flex;
+                   align-items: center;
                    justify-content: space-between;
                 .favi{
                     display: flex;
@@ -337,33 +465,31 @@
               .text{
                   font-size: $mg-left+5rpx;
                   color: $text-color;
-                  letter-spacing: 5rpx;
               }
           }
           
           .dialog-int{
-              margin:$mg-left 0 10rpx 0; 
-              height: 150rpx;
+              margin: 10rpx 0 $mg-left 0; 
+              height: 120rpx;
              .uni-data-checklist{
                  margin-top: 15rpx !important;
              }
           }
       }
+ 
   }
       .uni-card{
           margin: 0 !important;
       }
 
       .dialog-body{
-        width: 100%;
-        position: absolute;
-        bottom:  -7% !important;
          .body-header{
              color: #000;
              font-size: 20px;
              font-weight: bold;
              margin:10rpx;
              display: flex;
+              align-items: center;
              justify-content: space-between;
              .body-text{
                  display: flex;
@@ -373,44 +499,83 @@
                      font-size: 25rpx;
                  }
              }
-             .uni-numbox__minus {
-                 border:  $border-css;
-                 background-color:  $button-bg;
-                 border-radius: $mg-left 0  0 $mg-left;
-                 
-             }
-             .uni-numbox__value {
-                 margin: 0 !important;
-                 background-color: $button-bg;
-                 border: $border-css;
-             }
-             .uni-numbox__plus {
-                  border: $border-css;
-                  background-color: $button-bg;
-                  border-radius: 0 $mg-left   $mg-left 0;
-                 
-                 }
-                 .uni-numbox--text {
-                      color: $mian-color !important;
-                 }
+            
          }
         
          .body-bottom{
-             margin:15rpx;
             display: flex;
+           
             justify-content: space-around;
             
-            button{
-                margin: 30rpx 0 0 10rpx !important;
+           .btns{
+                margin-top: $mg-left !important;
                 width: 45%;
                 height: 70rpx;
                 line-height: 70rpx;
-                border-radius: 40rpx;
-                 font-size: 27rpx;
+                border-radius: 20rpx;
+                font-size: 27rpx;
+                background-color: $mian-color;
              }
          }
     }
-  
+   }
+}
+}
+.cart{
+    position: fixed;
+    z-index: 999;
+    width: 90%;
+    height: 100rpx;
+    position: fixed;
+    top:92%;
+    display: flex;
+    left: 5%;
+    color: $bg-right-color;
+    .cart-item{
+        width: 75%;
+        border-radius: 60rpx 0 0 60rpx;
+        background-color: #323232;
+        display:flex;
+        align-items: center;
+        .uni-badge--error {
+            background-color: $mian-color;
+        }
+
+        .bag{
+            width: 80rpx;
+            height: 80rpx;
+            margin-left: $mg-left*2;
+        }
+    }
+    .cart-item-right{
+        background-color: $mian-color;
+        width: 25%;
+        color: $bg-right-color;
+        line-height: 100rpx;
+        letter-spacing: 3rpx;
+        border-radius: 0 60rpx 60rpx 0;
+        padding-left: 10rpx
+;
+    }
+}
+.con{
+    position: fixed;
+    background-color: $bg-right-color;
+    max-height: 50vh;
+    padding-bottom: 120rpx;
+    bottom: 0%;
+    width: 100%;
+    border-radius: 40rpx 40rpx 0  0;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+.con-sum{
+   height: 60rpx;
+   font-size: 16px;
+   background-color: #d2d2d2;
+   border-radius: 40rpx 40rpx 0  0;
+   display: flex;
+   align-items: center;
+   justify-content:space-between;
+   padding: 0 2%;
 }
 }
 </style>
