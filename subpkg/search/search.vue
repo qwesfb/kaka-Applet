@@ -57,13 +57,14 @@
             };
            
         },
+      
         methods: {
            async doSearch(){
                if(this.searchResults = ''){
                    this.searchResults = []
                    return
                }else{
-                   const { data : res} = await uni.$http.get(`/kaka/v1/goods/qsearch`,{query : this.searchValue})
+                   const { data : res } = await uni.$http.get(`/kaka/v1/goods/qsearch`,{query : this.searchValue})
                    this.searchResults = res.message
                    this.historySearch()
                }
@@ -83,6 +84,7 @@
            clear(){
                this.searchResults =[]
            },
+           
           //保存搜索关键词
            historySearch(){
                //1.ES6数组去重 将数组转化成set对象/Set函数可以接受一个数组
@@ -99,12 +101,12 @@
                    this.historyList = []
                    uni.setStorageSync('searchValue', '[]')
                },
-            onload() {
-                //2.加载本地存储的搜索历史记录
-                this.historyList = JSON.parse(uni.setStorageSync('searchValue') || '[]')
-            }
-        }
-        
+            
+        },
+        onLoad() {
+            //2.加载本地存储的搜索历史记录
+            this.historyList = JSON.parse(uni.setStorageSync('searchValue') || '[]')
+        },
     }
 </script>
 

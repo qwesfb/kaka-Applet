@@ -3,7 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 import { $http } from '@escook/request-miniprogram'
-
+import store from './store/store'
 uni.$http = $http
 
 $http.baseUrl = 'http://127.0.0.1:4523/m1/1485158-0-default'
@@ -33,7 +33,9 @@ Vue.config.productionTip = false
 App.mpType = 'app'
 
 const app = new Vue({
-    ...App
+    ...App,
+    store
+    
 })
 app.$mount()
 // #endif
