@@ -31,10 +31,10 @@
            
             
           
-              <button class="btns" @click=" toggle(index)">选规格</button>
+              <button class="btns" @click="toggle(index)">选规格</button>
               
               <!-- 弹出框 -->
-              <uni-popup ref="popup"  v-show="show" type="bottom" background-color="#fff" class='popup-box'>
+              <uni-popup ref="popup" v-show="show" type="bottom" background-color="#fff" class='popup-box'>
                   <scroll-view>
                   <view class="dialog-a">
                     <view class="dialog-img">  
@@ -91,24 +91,24 @@
       </scroll-view>
     </view>
     <!-- 购物车 -->
-    <view class="cart" v-show="shoppingCat">
-       
-        <view class="cart-item">
+    
+       <my-cart class="cart" v-show="shoppingCat"></my-cart>
+        <!-- <view class="cart-item">
            <uni-badge class="uni-badge-left-margin" :text="count" absolute="rightTop" :offset="[-3, -3]" >
            		<image class="bag" src="../../static/bag.png" @tap.native="opengoods"></image>
            	</uni-badge>
-            <text>￥0</text>
+            <text>￥{{ checkedGoodsAmount }}</text>
         </view>
         <button class="cart-item-right" @click="pay">
             <text>去结算</text>
-        </button>
+        </button> -->
         
-    </view>
+    
     <!-- 购物车商品 -->
     <scroll-view class="con" scroll-y v-show="openGoods">
         <view class="con-sum">
-            <view>
-                <radio color="#4558ad" style="transform: scale(0.7); " checked='true'></radio>
+            <view @tap="changeAllState">
+                <radio color="#4558ad" style="transform: scale(0.7); " :checked="isFullCheck"></radio>
                 <text>全选</text>
            </view>
            <view @tap='remove'>
@@ -152,15 +152,13 @@
                 sweetInt:[],
                 //he
                 goodsInt:[],
-                //购物袋商品数量
-                count:0,
+              
                 //控制商品显示
                 show:true,
                 //
                 shoppingCat:false,
                 //
-                openGoods: false,
-                //购物车商品高度
+                openGoods:false,
             }
         },
         onLoad() {
@@ -200,6 +198,7 @@
             toggle(index) {
                 this.$refs.popup[index].open()
                 this.shoppingCat = false
+                this.openGoods = false
                 //先调用商品价格
                 this.price = this.menuRight[index].cat_price
                  if(this.goodsInt.length < 2){
@@ -247,7 +246,7 @@
               this.shoppingCat =  !this.shoppingCat
               this.show = !this.show;
                //组织选中的商品的信息对象
-                const goods = {
+                var goods = {
                         goods_id: item.cat_id,       // 商品的Id
                         goods_name: item.cat_title,   // 商品的名称
                         goods_price: this.price,// 商品的价格
@@ -262,12 +261,14 @@
            //vuex购物车辅助方法
            
            //把 m_cart 模块中的 addToCart 方法映射到当前页面使用
-            ...mapMutations('m_cart', ['addToCart','updateGoodsState','updateGoodsCount','removeGoods']),
+            ...mapMutations('m_cart', ['addToCart','updateGoodsState','updateGoodsCount','removeGoods','updateAllGoodsState','addToGoods']),
             
             //勾选状态改变
             radioChangeHandler(e) {
                 console.log(e) // 输出得到的数据 -> {goods_id: 395, goods_state: false}
                 this.updateGoodsState(e)
+               
+              
             },
             // 商品的数量发生了变化
             numberChangeHandler(e) {
@@ -275,11 +276,15 @@
             },
             //跳转结算页面
             pay(){
-                console.log(22);
+                if(!this.checkedCount) return uni.$showMsg('还没选择商品')
+                if(!this.token) return uni.$showMsg('请先登入')
                uni.navigateTo({
                   url:'/subpkg/pay/pay',
                    fail: () => {'跳转搜索页面失败'}
                });
+               // //调用 勾选的商品
+                 this.addToGoods()
+                
             },
             //购物袋点击
             opengoods(){
@@ -289,6 +294,11 @@
             remove(e){
                 this.removeGoods(e)
                 this.openGoods = !this.openGoods
+            },
+            //修改购物车中所有商品的选中状态
+            changeAllState(){
+                // console.log(! this.isFullCheck);
+                this.updateAllGoodsState(! this.isFullCheck)
             }
         },
     
@@ -297,7 +307,13 @@
             // ...mapState('模块的名称', ['要映射的数据名称1', '要映射的数据名称2'])
             ...mapState('m_cart', ['cart']),
              // 把 m_cart 模块中名称为 total 的 getter 映射到当前页面中使用
-            ...mapGetters('m_cart', ['total']),
+             //checkedCount选中商品数量
+            ...mapGetters('m_cart', ['total','checkedCount','checkedGoodsAmount']),
+            ...mapState('m_user',['token']),
+            //是否全选
+            isFullCheck(){
+                return this.total === this.checkedCount
+            }
           },
           
           // 通过 watch 侦听器，监听计算属性 total 值的变化，从而动态为购物车按钮的徽标赋值：
@@ -347,7 +363,6 @@
     
     .left-scroll-view-item {
       line-height: 70px;
-      //background-color: $bg-left-color;
       text-align: center;
       font-size: 12px;
       
@@ -531,32 +546,32 @@
     display: flex;
     left: 5%;
     color: $bg-right-color;
-    .cart-item{
-        width: 75%;
-        border-radius: 60rpx 0 0 60rpx;
-        background-color: #323232;
-        display:flex;
-        align-items: center;
-        .uni-badge--error {
-            background-color: $mian-color;
-        }
+    // .cart-item{
+    //     width: 75%;
+    //     border-radius: 60rpx 0 0 60rpx;
+    //     background-color: #323232;
+    //     display:flex;
+    //     align-items: center;
+    //     .uni-badge--error {
+    //         background-color: $mian-color;
+    //     }
 
-        .bag{
-            width: 80rpx;
-            height: 80rpx;
-            margin-left: $mg-left*2;
-        }
-    }
-    .cart-item-right{
-        background-color: $mian-color;
-        width: 25%;
-        color: $bg-right-color;
-        line-height: 100rpx;
-        letter-spacing: 3rpx;
-        border-radius: 0 60rpx 60rpx 0;
-        padding-left: 10rpx
-;
-    }
+    //     .bag{
+    //         width: 80rpx;
+    //         height: 80rpx;
+    //         margin-left: $mg-left*2;
+    //     }
+    // }
+    // .cart-item-right{
+    //     background-color: $mian-color;
+    //     width: 25%;
+    //     color: $bg-right-color;
+    //     line-height: 100rpx;
+    //     letter-spacing: 3rpx;
+    //     border-radius: 0 60rpx 60rpx 0;
+    //     padding-left: 10rpx
+
+    // }
 }
 .con{
     position: fixed;
@@ -576,6 +591,8 @@
    align-items: center;
    justify-content:space-between;
    padding: 0 2%;
+   position: sticky;
+   top: 0;
 }
 }
 </style>

@@ -13,6 +13,13 @@ $http.beforeRequest = function (options) {
   uni.showLoading({
       title:'数据加载中...'
   })
+  //只有在登录之后才允许调用支付相关的接口，所以必须为有权限的接口添加身份认证的请求头字段
+  //判断请求的是否是有权限的接口
+  if(options.url.indexOf('/user/') !== -1){
+      options.header ={
+          Authorization: store.state.m_user.token
+      }
+  }
 }
 
 // 请求完成之后做一些事情

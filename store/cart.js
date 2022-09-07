@@ -7,7 +7,8 @@ export default{
   namespaced: true,	
   //这里放的是子模块的属性，使用的时候这样用：this.$store.state.模块名.属性名
   state: {
-     cart: JSON.parse(uni.getStorageSync('cart') || '[]')
+     cart: JSON.parse(uni.getStorageSync('cart') || '[]'),
+     checkedgoods:JSON.parse(uni.getStorageSync('checkedgoods') || '[]'),
   },
   
   //这里放子模块的“操作”，使用的时候根据namespaced是否定义为true，
@@ -27,19 +28,25 @@ export default{
             findResult.goods_count++
           }
         this.commit('m_cart/saveToStorage')
-          console.log(state.cart);
         },
-    
+        //勾选的商品
+      addToGoods(state) {
+            state.checkedgoods = state.cart.filter( c => c.goods_state); 
+            this.commit('m_cart/saveToGoods')
+      },
+      
     // 将购物车中的数据持久化存储到本地,一般登入放数据库
     saveToStorage(state) {
        uni.setStorageSync('cart', JSON.stringify(state.cart))
+    },
+    saveToGoods(state) {
+       uni.setStorageSync('checkedgoods', JSON.stringify(state.checkedgoods))
     },
     
     // 更新购物车中商品的勾选状态
     updateGoodsState(state, goods) {
       // 根据 goods_id 查询购物车中对应商品的信息对象
       const findResult = state.cart.find(x => x.goods_id === goods.goods_id)
-    
       // 有对应的商品信息对象
       if (findResult) {
         // 更新对应商品的勾选状态
@@ -47,27 +54,32 @@ export default{
         // 持久化存储到本地
         this.commit('m_cart/saveToStorage')
       }
+
     },
     //更新购物车中商品数量
      updateGoodsCount(state,goods){
        const findResult = state.cart.find(x => x.goods_id === goods.goods_id)
-       
-       // 有对应的商品信息对象
        if (findResult) {
-         // 更新对应商品的勾选状态
          findResult.goods_count = goods.goods_count
-         // 持久化存储到本地
          this.commit('m_cart/saveToStorage')
      }
     },
     //清空选择的商品
     removeGoods(state){
-             state.cart = [],
-             // 持久化存储到本地
+             state.cart = []
+             state.checkedgoods=[]
              this.commit('m_cart/saveToStorage')
+               this.commit('m_cart/saveToGoods')
        },
+    // 更新所有商品的勾选状态
+    updateAllGoodsState(state, newState) {
+      // 循环更新购物车中每件商品的勾选状态
+      state.cart.forEach(x => x.goods_state = newState)
+      this.commit('m_cart/saveToStorage')
+
+    },
   },
-   // 模块的 getters 属性
+   // 数据报装器，提高代码复用性
    getters: {
       // 统计购物车中商品的总数量
       total(state) {
@@ -75,8 +87,18 @@ export default{
          // 循环统计商品的数量，累加到变量 c 中
          state.cart.forEach(goods => c += goods.goods_count)
          return c
-      }
-
+      },
+      //统计已勾选的商品
+      checkedCount(state){
+          //先过滤已勾选的商品--用reduce方法返回（累加勾选的商品数量） 
+          return state.cart.filter( c => c.goods_state).reduce((totle,item) => totle += item.goods_count,0)
+      },
+      // 已勾选的商品的总价
+      checkedGoodsAmount(state) {
+        // 过滤器已勾选的商品--将已勾选的商品数量 * 单价之后，进行累加(reduce) )
+        return state.cart.filter(x => x.goods_state)
+                         .reduce((total, item) => total += item.goods_count * item.goods_price, 0)
+      },
    },
 
   actions: {

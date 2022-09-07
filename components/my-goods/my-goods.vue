@@ -54,7 +54,7 @@
             // 商品的 Id
             goods_id: this.goods.goods_id,
             // 商品的最新数量
-            goods_count: +val                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+            goods_count: +val
           })
         }
     },
@@ -63,6 +63,7 @@
 </script>
 
 <style lang="scss">
+ 
     $mian-color: #4558ad ;
     $mg-left: 20rpx;
     $bg-right-color: #ffffff ;
