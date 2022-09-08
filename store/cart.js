@@ -32,6 +32,7 @@ export default{
         //勾选的商品
       addToGoods(state) {
             state.checkedgoods = state.cart.filter( c => c.goods_state); 
+           
             this.commit('m_cart/saveToGoods')
       },
       

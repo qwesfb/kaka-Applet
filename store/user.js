@@ -49,6 +49,7 @@ export default {
     saveTokenToStorage(state) {
         uni.setStorageSync('token', state.token)
     }
+    
 },
 
   // 数据包装器，为了提高代码的复用性，可以把收货的详细地址抽离为 getters，方便在多个页面和组件之间实现复用。
