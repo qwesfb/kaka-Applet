@@ -1,27 +1,15 @@
 <template>
-  <view class="my-userinfo-container">
+  <view>
 
     <!-- 头像昵称区域 -->
    <view class="top-box">
      <image :src="userinfo.avatarUrl" class="avatar"></image>
-     <view class="nickname">{{userinfo.nickName}}</view>
+     <view class="nickname">
+     <tex>{{userinfo.nickName}}</tex>
+     <view class="tips-text">欢迎登入咔咔饮品</view>
+     </view>
    </view>
-   
-<!-- 第三个面板 -->
-<view class="panel">
-  <view class="panel-list-item">
-    <text>收货地址</text>
-    <uni-icons type="arrowright" size="15"></uni-icons>
-  </view>
-  <view class="panel-list-item">
-    <text>联系客服</text>
-    <uni-icons type="arrowright" size="15"></uni-icons>
-  </view>
-  <view class="panel-list-item"  @click="logout">
-    <text>退出登录</text>
-    <uni-icons type="arrowright" size="15"></uni-icons>
-  </view>
-</view>
+  
    
   </view>
 </template>
@@ -32,7 +20,7 @@
         name:"my-userinfo",
         data() {
             return {
-                
+               
             };
         },
         computed: {
@@ -40,64 +28,42 @@
             ...mapState('m_user', ['userinfo']),
           },
           methods: {
-               ...mapMutations('m_user', ['updateUserInfo', 'updateToken', 'updateAddress']),
-            // 退出登录
-            async logout() {
-              // 询问用户是否退出登录
-              const [err, succ] = await uni.showModal({
-                title: '提示',
-                content: '确认退出登录吗？'
-              }).catch(err => err)
-            
-              if (succ && succ.confirm) {
-                 // 用户确认了退出登录的操作
-                 // 需要清空 vuex 中的 userinfo、token 和 address
-                 this.updateUserInfo({})
-                 this.updateToken('')
-                 this.updateAddress({})
-              }
-          },
+
         }
     }
 </script>
 
 <style lang="scss">
-.my-userinfo-container {
-  height: 100%;
-  // 为整个组件的结构添加浅灰色的背景
-  background-color: #f4f4f4;
-
   .top-box {
-    height: 400rpx;
-    background-color: #c00000;
+    height: 250rpx;
+    border-radius:  0 0 40rpx 40rpx;
+    background-color: #f1da17;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
+   
 
     .avatar {
       display: block;
-      width: 90px;
-      height: 90px;
+      width: 70px;
+      height: 70px;
       border-radius: 45px;
       border: 2px solid white;
       box-shadow: 0 1px 5px black;
+      margin:  0 20rpx;
     }
 
     .nickname {
       color: white;
       font-weight: bold;
       font-size: 16px;
-      margin-top: 10px;
+    }
+    .tips-text{
+        font-size: 12px;
+          margin-top: 10rpx;
+          color: gray;
+        
     }
   }
-}
-.panel-list-item {
-  height: 45px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 15px;
-  padding: 0 10px;
-}
+
+
 </style>

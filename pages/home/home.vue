@@ -11,12 +11,24 @@
         </view>
         
         <view class="user box">
-            <text> xx </text>
+            <!-- 用户未登录时，显示登录组件 -->
+             <my-login v-if="!token"></my-login>
+            
+             <!-- 用户登录后，显示用户信息组件 -->
+            <my-userinfo v-else></my-userinfo>
         </view>
         
         <view class="order box">
-            <view class="order-item" style="border-right: 5rpx #A9A9A9 dashed;">自取</view>
-            <view class="order-item">外卖</view>
+            <view class="order-item" style="border-right: 5rpx #A9A9A9 dashed;">
+             
+                <text class="order-item-text">到店自取</text>
+                <image src="../../static/order.png" style="transform: rotate(0);"></image>
+                
+            </view>
+            <view class="order-item">
+                <text class="order-item-text">外卖上门</text>
+                <image src="../../static/list.png"></image>
+            </view>
         </view>
     
     
@@ -40,6 +52,7 @@
 </template>
 
 <script>
+        import { mapState } from 'vuex'
     export default {
         data() {
             return {
@@ -50,6 +63,10 @@
         onLoad() {
             this.getSwiperList()
             this.getNavlist()
+        },
+        computed: {
+            //导入token字符串
+            ...mapState('m_user',['token'])
         },
         methods: {
             // 获取轮播图数据的方法
@@ -95,13 +112,42 @@
         margin-top: -80rpx ;
         z-index: 2;
         height: 150rpx;
+        .top-box{
+            background-color: #fff;
+            height: 100% !important;
+            margin-left: 10rpx !important;
+        }
+        .avatar{
+            margin: 20rpx !important;
+            width: 60px !important;
+            height: 60px !important;
+        }
+        .uni-icons{
+            font-size: 73px !important;
+        }
+        .nickname{
+            color: #000 !important;
+        }
     }
     .order{
         height: 350rpx;
         margin-top: 120rpx;
         display: flex;
         .order-item{
-            width: 50%;
+            width: 48%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+            .order-item-text{
+                font-size: 50rpx;
+                font-weight: bolder;
+            }
+            image{
+                width: 100px;
+                height: 100px;
+                transform: rotateZ(37deg);
+            }
         }
     }
     

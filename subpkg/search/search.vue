@@ -10,7 +10,7 @@
         </view>
         <view class="goods" v-if="searchResults.length !== 0">
             <view class="right-scroll-view-item" v-for=" (item,index) in searchResults" :key="index">
-               <image :src="item.goods_img"></image>
+               <image :src="item.goods_img" class="item-img"></image>
                 <view class="container">
                     <text  class="text title">{{ item.goods_name}}</text>
                     <text  class="text ftitle">[{{ item. goods_text }}]</text>
@@ -19,7 +19,7 @@
                 </view>
                 <view class="item-right">
                   <button  @click="choice()">选规格</button>
-                <!-- <uni-popup ref="popup" type="bottom" background-color="#fff">tc</uni-popup> -->
+               
                 </view>
             </view>
         </view>

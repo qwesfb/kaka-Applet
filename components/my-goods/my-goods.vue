@@ -1,4 +1,5 @@
 <template>
+    
   <view class="right-scroll-view-item" >
     <!-- 商品左侧图片区域 -->
     <radio :checked="goods.goods_state" color="#4558ad"  style="transform:scale(0.7)"  @click="radioClickHandler"></radio>
@@ -12,7 +13,7 @@
        <view class="text ftitle"> {{goods.goods_content}} </view>
      </view>
      <view class="item-right">
-         <text class="text price">￥{{goods. goods_price}}</text>
+         <text class="text price">￥{{goods.goods_price}}</text>
            <uni-number-box  min="1" max="99" :value="goods.goods_count" @change="numChangeHandler"></uni-number-box>
      </view>
       </view>

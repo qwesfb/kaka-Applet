@@ -34,50 +34,24 @@
               <button class="btns" @click="toggle(index)">选规格</button>
               
               <!-- 弹出框 -->
-              <uni-popup ref="popup" v-show="show" type="bottom" background-color="#fff" class='popup-box'>
-                  <scroll-view>
-                  <view class="dialog-a">
-                    <view class="dialog-img">  
-                        <image :src="item.cat_img" class="img"></image>
-                    </view>
-                    <view class="dialog-text">
-                        <view class="title">{{ item.cat_title}} 
-                        <view class="favi">
-                            <uni-icons type="heart" size="20"></uni-icons>
-                            <text>收藏</text>
-                        </view>
-                       </view>
-                        <view class="text">{{ item.cat_int }}</view>
-                    </view>
-                    <view class="dialog-int">
-                        <text class="int-text">杯型</text>
-                        <uni-data-checkbox v-model="value" mode="tag" :localdata="range"
-                        selectedTextColor="#fff" selectedColor="#4558ad" @change="change(item.cat_price)">
-                         </uni-data-checkbox>
-                    </view>
-                    <view class="dialog-int">
-                        <text>甜度</text>
-                        <uni-data-checkbox mode="tag" :localdata="rangeb"  v-model="sweetValue"
-                        selectedTextColor="#fff"  selectedColor="#4558ad" @change="changeValue() ">
-                        </uni-data-checkbox>
-                    </view>
-                    
-                  </view>
-                  </scroll-view>
+              <uni-popup ref="popup" type="bottom" background-color="#fff" class='popup-box' v-show="openpopup">
+               <scroll-view scroll-y class="scroll-popup">
+                  <my-popup :goods="item"  @goods-int="checkint"></my-popup>
+                </scroll-view>
                   
                  <!-- 2按钮 -->
                  <uni-card class='dialog-body' >
                      <view class="body-header">
                         <view class="body-text">
-                            <text>￥{{ price }} </text>
+                            <text>￥{{ item.cat_price }} </text>
                             <view class="body-text-min">
-                            <text  v-for="(item,i) in goodsInt" :key="i">{{ item }}</text>
+                            <text  v-for="(item, i) in goodsInt" :key="i">{{ item }}</text>
                            </view>
                         </view>
-                        <uni-number-box @change="changeValue" min="1" max="99"></uni-number-box>
+                        <uni-number-box min="1" max="99"></uni-number-box>
                      </view>
                      <view class="body-bottom">
-                          <button class="btns">立即购买</button>
+                          <button class="btns" @tap="shooping(item)">立即购买</button>
                           <button class="btns" @tap="cat(item)"> 加入购物车</button>
                      </view>
                  </uni-card>
@@ -91,20 +65,10 @@
       </scroll-view>
     </view>
     <!-- 购物车 -->
-    
-       <my-cart class="cart" v-show="shoppingCat"></my-cart>
-        <!-- <view class="cart-item">
-           <uni-badge class="uni-badge-left-margin" :text="count" absolute="rightTop" :offset="[-3, -3]" >
-           		<image class="bag" src="../../static/bag.png" @tap.native="opengoods"></image>
-           	</uni-badge>
-            <text>￥{{ checkedGoodsAmount }}</text>
-        </view>
-        <button class="cart-item-right" @click="pay">
-            <text>去结算</text>
-        </button> -->
+       <my-cart class="cart" @open-goods="opengoods" v-show="openCart"></my-cart>
         
     
-    <!-- 购物车商品 -->
+    <!-- 购物车商品-->
     <scroll-view class="con" scroll-y v-show="openGoods">
         <view class="con-sum">
             <view @tap="changeAllState">
@@ -140,25 +104,13 @@
                 // 窗口的可用高度 = 屏幕高度 - navigationBar高度 - tabBar 高度
                 wh: 0,
                 navheight:0,
-                value: 0,
-                sweetValue:0,
-                range: [{"value": 0,"text": "M杯"},{"value": 1,"text": "L杯"}],
-                rangeb: [{"value": 0,"text": "7分糖"},{"value": 1,"text": "不加糖"},{"value": 2,"text": "3分糖"}],
-                //商品价格
-                price:'',
-                //杯型
-                sizeInt:[],
-                //甜度
-                sweetInt:[],
-                //he
-                goodsInt:[],
-              
-                //控制商品显示
-                show:true,
-                //
-                shoppingCat:false,
-                //
+                //控制显示
                 openGoods:false,
+                openCart:true,
+                openpopup:true,
+                //商品参数
+                goodsInt:['7分糖,正常冰'],
+                
             }
         },
         onLoad() {
@@ -169,18 +121,18 @@
             this.wh = sysInfo.windowHeight
             //导航高度
             this.navheight = sysInfo.statusBarHeight
-            if(this.cart.length != 0){
-                 this.shoppingCat= !this.shoppingCat
+            if(this.cart.length == 0){
+                this.openCart == false
             }
            
            
         },
         methods: {
+
             async getMenu(){
                 const { data : res } = await uni.$http.get(`/kaka/v1/menu`)
                 this.memuList = res.message
                 this.menuRight = res.message[0].children
-                this.price = this.menuRight.cat_price
             },
             //动态判断-样式
             activemenu(i){
@@ -197,63 +149,28 @@
             //弹出框
             toggle(index) {
                 this.$refs.popup[index].open()
-                this.shoppingCat = false
-                this.openGoods = false
-                //先调用商品价格
-                this.price = this.menuRight[index].cat_price
-                 if(this.goodsInt.length < 2){
-                     this.sizeInt.push(this.range[0].text)
-                     this.sweetInt.push(this.rangeb[0].text)
-                     this.goodsInt = this.sizeInt + this.sweetInt
-                 }
-
-                
-               
+                this.openpopup = true
             },
-            change(e) {
-                if(this.value === 0 ){
-                    this.price = e
-                    this.sizeInt = []
-                    this.sizeInt.push(this.range[0].text)
-                    this.goodsInt = this.sizeInt + this.sweetInt
-                }else{
-                   const priceb = Number(e)+1
-                   this.price = priceb
-                   this.sizeInt = []
-                   this.sizeInt.push(this.range[1].text)
-                   this.goodsInt = this.sizeInt + this.sweetInt
-                }
+            //接受子组件传递的参数
+            checkint(goodsInt){
+               this.goodsInt = goodsInt
             },
-            //数据选择器
-            changeValue(value) {
-                if(this.sweetValue == 0){
-                    this.sweetInt = []
-                    this.sweetInt.push(this.rangeb[0].text)
-                    this.goodsInt = this.sizeInt + this.sweetInt
-                }else if(this.sweetValue == 1){
-                    this.sweetInt = []
-                    this.sweetInt.push(this.rangeb[1].text)
-                    this.goodsInt = this.sizeInt + this.sweetInt
-                }else{
-                    this.sweetInt = []
-                    this.sweetInt.push(this.rangeb[2].text)
-                    this.goodsInt = this.sizeInt + this.sweetInt
-                }
+            //立即购买？？（调用支付接口）
+            shooping(item){
+                this.cat(item)
             },
             //购物车
            cat(item){
-               //关闭弹出框
-              this.shoppingCat =  !this.shoppingCat
-              this.show = !this.show;
+               this.openpopup = false
                //组织选中的商品的信息对象
                 var goods = {
                         goods_id: item.cat_id,       // 商品的Id
                         goods_name: item.cat_title,   // 商品的名称
-                        goods_price: this.price,// 商品的价格
+                        goods_price: item.cat_price,// 商品的价格
                         goods_count: 1 ,                           // 商品的数量
                         goods_small_logo: item.cat_img, // 商品的图片
                         goods_state: true,                      // 商品的勾选状态
-                        goods_content: this.goodsInt  //商品选择参数
+                        goods_content: this.goodsInt[0]  //商品选择参数
                      }
                // 3. 通过 this 调用映射过来的 addToCart 方法，把商品信息对象存储到购物车中
                 this.addToCart(goods)
@@ -274,22 +191,8 @@
             numberChangeHandler(e) {
               this.updateGoodsCount(e)
             },
-            //跳转结算页面
-            pay(){
-                if(!this.checkedCount) return uni.$showMsg('还没选择商品')
-                if(!this.token) return uni.$showMsg('请先登入')
-               uni.navigateTo({
-                  url:'/subpkg/pay/pay',
-                   fail: () => {'跳转搜索页面失败'}
-               });
-               // //调用 勾选的商品
-                 this.addToGoods()
-                
-            },
-            //购物袋点击
-            opengoods(){
-                this.openGoods = !this.openGoods
-            },
+            
+
             //清空
             remove(e){
                 this.removeGoods(e)
@@ -299,7 +202,18 @@
             changeAllState(){
                 // console.log(! this.isFullCheck);
                 this.updateAllGoodsState(! this.isFullCheck)
-            }
+            },
+            
+            //接受自定义插件的显示隐藏控制
+            opengoods(openGoods){
+                if(this.openGoods == false){
+                    this.openGoods = openGoods
+                }else{
+                     this.openGoods = !openGoods
+                }
+               
+              
+            },
         },
     
         computed: {
@@ -309,25 +223,14 @@
              // 把 m_cart 模块中名称为 total 的 getter 映射到当前页面中使用
              //checkedCount选中商品数量
             ...mapGetters('m_cart', ['total','checkedCount','checkedGoodsAmount']),
-            ...mapState('m_user',['token']),
+
             //是否全选
             isFullCheck(){
                 return this.total === this.checkedCount
             }
           },
           
-          // 通过 watch 侦听器，监听计算属性 total 值的变化，从而动态为购物车按钮的徽标赋值：
-            watch: {
-              // 监听 total 值的变化，通过第一个形参得到变化后的新值
-              //用对象的方法监听
-              total: {
-              handler(newVal) {
-                this.count = newVal
-              },
-              //声明此侦听器在页面初次加载完成调用
-              immediate: true
-              }
-            },
+        
     }
 </script>
 
@@ -338,8 +241,7 @@
     $bg-left-color: #f6f6f6;
     $text-color: #a8a8a8;
     $img-size: 28%;
-    $border-css: #d2d2d2 1rpx solid;
-    
+ 
 .search{
     margin-left: 30rpx;
     font-size: 35rpx;
@@ -439,65 +341,27 @@
           margin-right: $mg-left ;
       }
       
-      // 弹出框
-    .vue-ref{
-        padding:  0 !important;
-    }
-        .dialog-a:empty {
-             // 插槽是空 则显示默认插槽
-          display: block;
+
+    .popup-box{
+        z-index: 99999;
+        // 弹出框
+        .vue-ref{
+            padding:  0 !important;
+            border-radius: 40rpx ;
         }
-      .dialog-a{
-          margin:15rpx 30rpx;
-          .dialog-img{
-              height: 200rpx;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              margin: 20rpx 0;
-              .img{
-                  width: 50%;
-              }
-          }
-          .dialog-text{
-              height: 175rpx;
-              .title{
-                   font-size: 40rpx;
-                   font-weight:500;
-                   margin-bottom: $mg-left;
-                   display: flex;
-                   align-items: center;
-                   justify-content: space-between;
-                .favi{
-                    display: flex;
-                    flex-direction: column;
-                    border-left: $border-css;
-                    margin-right: $mg-left;
-                    padding-left: $mg-left*2;
-                    font-size: 20rpx;
-                }
-              }
-              .text{
-                  font-size: $mg-left+5rpx;
-                  color: $text-color;
-              }
-          }
-          
-          .dialog-int{
-              margin: 10rpx 0 $mg-left 0; 
-              height: 120rpx;
-             .uni-data-checklist{
-                 margin-top: 15rpx !important;
-             }
-          }
-      }
+    } 
  
   }
       .uni-card{
           margin: 0 !important;
       }
-
+      .scroll-popup{
+          margin-bottom: 125px;
+      }
       .dialog-body{
+           position: fixed;
+           bottom: 0;
+           width: 100%;
          .body-header{
              color: #000;
              font-size: 20px;
@@ -538,40 +402,15 @@
 }
 .cart{
     position: fixed;
-    z-index: 999;
+    z-index: 99;
     width: 90%;
     height: 100rpx;
-    position: fixed;
     top:92%;
-    display: flex;
     left: 5%;
     color: $bg-right-color;
-    // .cart-item{
-    //     width: 75%;
-    //     border-radius: 60rpx 0 0 60rpx;
-    //     background-color: #323232;
-    //     display:flex;
-    //     align-items: center;
-    //     .uni-badge--error {
-    //         background-color: $mian-color;
-    //     }
-
-    //     .bag{
-    //         width: 80rpx;
-    //         height: 80rpx;
-    //         margin-left: $mg-left*2;
-    //     }
-    // }
-    // .cart-item-right{
-    //     background-color: $mian-color;
-    //     width: 25%;
-    //     color: $bg-right-color;
-    //     line-height: 100rpx;
-    //     letter-spacing: 3rpx;
-    //     border-radius: 0 60rpx 60rpx 0;
-    //     padding-left: 10rpx
-
-    // }
+    .uni-badge--error {
+        background-color: $mian-color;
+    }
 }
 .con{
     position: fixed;

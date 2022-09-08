@@ -1,11 +1,14 @@
 <template>
-  <view class="login-container">
-    <!-- 提示登录的图标 -->
-    <uni-icons type="contact-filled" size="100" color="#AFAFAF"></uni-icons>
-    <!-- 登录按钮 -->
-    <button type="primary" class="btn-login" @click="getUserProfile">一键登录</button>
-    <!-- 登录提示 -->
-    <view class="tips-text">登录后尽享更多权益</view>
+  <view>
+      <view class="top-box"  @click.native="getUserProfile">
+          <uni-icons type="contact-filled" size="100" color="#AFAFAF"  ></uni-icons>
+        <view class="nickname">
+            <text>登录账户</text>
+            <view class="tips-text">登录后尽享更多权益</view>
+        </view>
+      </view>
+
+
   </view>
 </template>
 
@@ -66,43 +69,27 @@
 </script>
 
 <style lang="scss">
-.login-container {
-  // 登录盒子的样式
-  height: 750rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #f8f8f8;
-  position: relative;
-  overflow: hidden;
+    .top-box {
+      height: 250rpx;
+       border-radius:  0 0 40rpx 40rpx;
+      background-color: #f1da17;
+      display: flex;
+      align-items: center;
 
-  // 绘制登录盒子底部的半椭圆造型
-  &::after {
-    content: ' ';
-    display: block;
-    position: absolute;
-    width: 100%;
-    height: 40px;
-    left: 0;
-    bottom: 0;
-    background-color: white;
-    border-radius: 100%;
-    transform: translateY(50%);
-  }
+      .nickname {
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+      }
+    }
 
-  // 登录按钮的样式
-  .btn-login {
-    width: 90%;
-    border-radius: 100px;
-    margin: 15px 0;
-    background-color: #c00000;
-  }
+
 
   // 按钮下方提示消息的样式
   .tips-text {
     font-size: 12px;
+    margin-top: 10rpx;
     color: gray;
   }
-}
+
 </style>
