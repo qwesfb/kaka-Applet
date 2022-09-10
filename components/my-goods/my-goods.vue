@@ -10,7 +10,7 @@
       <!-- 商品标题 -->
       <view class="container">
        <view class="text title">{{goods.goods_name}}</view>
-       <view class="text ftitle"> {{goods.goods_content}} </view>
+       <view class="text ftitle"> {{goods.goods_content.goodsInt}} </view>
      </view>
      <view class="item-right">
          <text class="text price">￥{{goods.goods_price}}</text>

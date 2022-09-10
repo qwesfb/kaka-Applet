@@ -35,7 +35,9 @@
               
               <!-- 弹出框 -->
               <uni-popup ref="popup" type="bottom" background-color="#fff" class='popup-box' v-show="openpopup">
+                    <uni-icons type="close" @click="close" size="30" class='close'></uni-icons>
                <scroll-view scroll-y class="scroll-popup">
+                  
                   <my-popup :goods="item"  @goods-int="checkint"></my-popup>
                 </scroll-view>
                   
@@ -48,7 +50,7 @@
                             <text  v-for="(item, i) in goodsInt" :key="i">{{ item }}</text>
                            </view>
                         </view>
-                        <uni-number-box min="1" max="99"></uni-number-box>
+                        <uni-number-box min="1" max="99" @change="count"></uni-number-box>
                      </view>
                      <view class="body-bottom">
                           <button class="btns" @tap="shooping(item)">立即购买</button>
@@ -110,7 +112,8 @@
                 openpopup:true,
                 //商品参数
                 goodsInt:['7分糖,正常冰'],
-                
+                //选择的商品数量
+                goodsdCount:1
             }
         },
         onLoad() {
@@ -122,13 +125,15 @@
             //导航高度
             this.navheight = sysInfo.statusBarHeight
             if(this.cart.length == 0){
-                this.openCart == false
+                this.openGoods = false
             }
-           
-           
+         
         },
+        
         methods: {
-
+            count(e){
+                this.goodsdCount = e
+            },
             async getMenu(){
                 const { data : res } = await uni.$http.get(`/kaka/v1/menu`)
                 this.memuList = res.message
@@ -142,14 +147,18 @@
                 
             search(){
                 uni.navigateTo({
-                   url:'/subpkg/search/search',
-                    fail: () => {'跳转搜索页面失败'}
+                url:'/subpkg/search/search',
+                 fail: () => {'跳转搜索页面失败'}
                 });
             },
             //弹出框
             toggle(index) {
                 this.$refs.popup[index].open()
                 this.openpopup = true
+            },
+            //弹出框关闭按钮
+            close(){
+                 this.openpopup = false
             },
             //接受子组件传递的参数
             checkint(goodsInt){
@@ -162,15 +171,16 @@
             //购物车
            cat(item){
                this.openpopup = false
+               this.openCart = true
                //组织选中的商品的信息对象
                 var goods = {
                         goods_id: item.cat_id,       // 商品的Id
                         goods_name: item.cat_title,   // 商品的名称
                         goods_price: item.cat_price,// 商品的价格
-                        goods_count: 1 ,                           // 商品的数量
+                        goods_count: this.goodsdCount ,                           // 商品的数量
                         goods_small_logo: item.cat_img, // 商品的图片
                         goods_state: true,                      // 商品的勾选状态
-                        goods_content: this.goodsInt[0]  //商品选择参数
+                        goods_content: this.goodsInt  //商品选择参数
                      }
                // 3. 通过 this 调用映射过来的 addToCart 方法，把商品信息对象存储到购物车中
                 this.addToCart(goods)
@@ -357,6 +367,11 @@
       }
       .scroll-popup{
           margin-bottom: 125px;
+      }
+      .close{
+          float: right;
+          display: block;
+          margin: $mg-left $mg-left 0 0;
       }
       .dialog-body{
            position: fixed;
