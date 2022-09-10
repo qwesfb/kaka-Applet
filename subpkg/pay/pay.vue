@@ -35,7 +35,7 @@
                 <!-- 商品标题 -->
                 <view class="container">
                     <view class="title">{{item.goods_name}}</view>
-                    <view class="ftitle"> {{item.goods_content}} </view>
+                    <view class="ftitle"> {{item.goods_content.goodsInt}} </view>
                   
                </view>
                <view class="item-right">

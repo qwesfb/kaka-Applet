@@ -5,10 +5,11 @@
               <image :src="goods.cat_img" class="img"></image>
           </view>
           <view class="dialog-text">
-              <view class="title">{{ goods.cat_title}} 
-              <view class="favi">
-                  <uni-icons type="heart" size="20"></uni-icons>
-                  <text>收藏</text>
+              <view class="title">{{ goods.cat_title}}
+              <view class="favi" @click.native="favClick">
+                  <!--  :color="[isClick ? '#4558ad': '#b2b2b2']" -->
+                 <uni-icons type="heart-filled" size="20"></uni-icons>
+                  <text>{{isClick?'已收藏':'收藏'}}</text>
               </view>
              </view>
               <view class="text">{{ goods.cat_int }}</view>
@@ -48,9 +49,12 @@
                 value: 0,
                 sweetValue:0,
                 //he
-                goodsInt:["正常冰,7分糖"],
-                sweetInt:["7分糖"],
-                iceInt:["正常冰"]
+                goodsInt:"正常冰,7分糖",
+                sweetInt:"7分糖",
+                iceInt:"正常冰",
+                isClick: false,
+          
+
             };
         },
         methods: {
@@ -70,6 +74,27 @@
                 goodsInt:this.goodsInt
               })
          },
+         //收藏
+         favClick(e) {
+             if (this.isClick == true) {
+                   wx.showToast({
+                     title: '取消成功',
+                     icon: 'success',
+                     mask: true
+                   });
+                     
+                 }else{
+                      wx.showToast({
+                             title: '收藏成功',
+                             icon: 'success',
+                             mask: true
+                           });
+
+                 }
+         			this.isClick = !this.isClick
+                    //强制刷新
+                    this.$forceUpdate()
+         			}
         },
 
     }
@@ -85,6 +110,7 @@
     $border-css: #d2d2d2 1rpx solid;
       .dialog-a{
           max-height: 50vh;
+          
           margin:15rpx 30rpx;
           .dialog-img{
               height: 275rpx;
@@ -108,10 +134,14 @@
                 .favi{
                     display: flex;
                     flex-direction: column;
+                    align-items: center;
                     border-left: $border-css;
                     margin-right: $mg-left;
                     padding-left: $mg-left*2;
                     font-size: 20rpx;
+                }
+                check{
+                    
                 }
               }
               .text{
